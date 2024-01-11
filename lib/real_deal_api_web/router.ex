@@ -7,5 +7,11 @@ defmodule RealDealApiWeb.Router do
 
   scope "/api", RealDealApiWeb do
     pipe_through :api
+
+    get "/", DefaultController, :index
+
+    resources "/accounts", AccountController, except: [:new, :edit]
+
+    resources "/users", UserController, except: [:new, :edit]
   end
 end

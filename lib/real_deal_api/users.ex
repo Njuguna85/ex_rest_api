@@ -49,8 +49,11 @@ defmodule RealDealApi.Users do
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_user(attrs \\ %{}) do
-    %User{}
+  # to create a user we create an account and associate it with user attrs
+  # the build_assoc function will add the account_id to the user attrs
+  def create_user(account, attrs \\ %{}) do
+    account
+    |> Ecto.build_assoc(:user)
     |> User.changeset(attrs)
     |> Repo.insert()
   end

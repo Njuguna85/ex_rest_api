@@ -48,6 +48,7 @@ defmodule RealDealApiWeb.AccountController do
       {:ok, account, token} ->
         conn
         |> put_status(:ok)
+        |> put_session(:account_id, account.id)
         |> render(:show, %{account: account, token: token})
 
       {:error, :unauthorized} ->

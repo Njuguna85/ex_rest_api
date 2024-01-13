@@ -15,7 +15,8 @@ defmodule RealDealApi.Application do
       # Start a worker by calling: RealDealApi.Worker.start_link(arg)
       # {RealDealApi.Worker, arg},
       # Start to serve requests, typically the last entry
-      RealDealApiWeb.Endpoint
+      RealDealApiWeb.Endpoint,
+      {Guardian.DB.Token.SweeperServer, []}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

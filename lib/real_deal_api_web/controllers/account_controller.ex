@@ -1,10 +1,26 @@
 defmodule RealDealApiWeb.AccountController do
   use RealDealApiWeb, :controller
 
+  alias Guardian.Permissions.Plug
+  alias ElixirSense.Core.Guard
   alias RealDealApi.{Users, Users.User, Accounts, Accounts.Account}
-  alias RealDealApiWeb.{Auth.Guardian, Auth.ErrorResponse}
+  alias RealDealApiWeb.Auth.{Guardian, ErrorResponse}
+
+  plug :is_authorized_account when action in [:update, :delete]
 
   action_fallback RealDealApiWeb.FallbackController
+
+  defp is_authorized_account(conn, _options) do
+    IO.inspect(conn.assigns, label: "Conn Assigns")
+    %{params: params} = conn
+    account = Accounts.get_account!(params["id"])
+
+    if conn.assigns.account.id == account.id do
+      conn
+    else
+      raise ErrorResponse.Forbidden
+    end
+  end
 
   def index(conn, _params) do
     accounts = Accounts.list_accounts()
@@ -27,8 +43,9 @@ defmodule RealDealApiWeb.AccountController do
     render(conn, :show, account: account)
   end
 
-  def update(conn, %{"id" => id, "account" => account_params}) do
-    account = Accounts.get_account!(id)
+  def update(conn, %{"account" => account_params}) do
+    IO.inspect(account_params, label: "Account Params")
+    account = Accounts.get_account!(account_params["id"])
 
     with {:ok, %Account{} = account} <- Accounts.update_account(account, account_params) do
       render(conn, :show, account: account)
@@ -53,6 +70,41 @@ defmodule RealDealApiWeb.AccountController do
 
       {:error, :unauthorized} ->
         raise ErrorResponse.Unauthorized, "Email or Password incorrect."
+    end
+  end
+
+  def sign_out(conn, %{}) do
+    account = conn.assigns[:account]
+
+    token = Guardian.Plug.current_token(conn)
+    Guardian.revoke(token)
+
+    conn
+    |> clear_session()
+    |> put_status(:ok)
+    |> render(:show, %{account: account})
+  end
+
+  def refresh_session(conn, %{}) do
+    old_token = Guardian.Plug.current_token(conn)
+
+    case Guardian.decode_and_verify(old_token) do
+      {:ok, claims} ->
+        case Guardian.resource_from_claims(claims) do
+          {:ok, account} ->
+            {:ok, _old, {new_token, _new_claims}} = Guardian.refresh(old_token)
+
+            conn
+            |> put_session(:account_id, account.id)
+            |> put_status(:ok)
+            |> render(:show, %{account: account, token: new_token})
+
+          {:error, _reason} ->
+            raise ErrorResponse.NotFound
+        end
+
+      {:error, _reason} ->
+        raise ErrorResponse.NotFound
     end
   end
 end

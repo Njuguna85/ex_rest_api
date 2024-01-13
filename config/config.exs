@@ -27,6 +27,16 @@ config :logger, :console,
   format: "$time $metadata[$level] $message\n",
   metadata: [:request_id]
 
+config :guardian, Guardian.DB,
+  # Add your repository module
+  repo: RealDealApi.Repo,
+  # default
+  schema_name: "guardian_tokens",
+  # store all token types if not set
+  token_types: ["refresh_token"],
+  # default: 60 minutes
+  sweep_interval: 60
+
 alias RealDealApiWeb.Auth.Guardian
 
 config :real_deal_api, Guardian,

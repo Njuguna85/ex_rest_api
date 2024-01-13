@@ -12,6 +12,11 @@ defmodule RealDealApiWeb.Router do
     conn |> json(%{errors: message}) |> halt()
   end
 
+  # @impl Plug.ErrorHandler
+  # def handle_errors(conn, map) do
+  #   conn |> halt()
+  # end
+
   pipeline :api do
     plug :accepts, ["json"]
     plug :fetch_session
@@ -27,8 +32,7 @@ defmodule RealDealApiWeb.Router do
 
     get "/", DefaultController, :index
 
-    resources "/accounts", AccountController, except: [:new, :edit]
-
+    post "/accounts", AccountController, :create
     post "/accounts/sign_in", AccountController, :sign_in
 
     resources "/users", UserController, except: [:new, :edit]
@@ -38,5 +42,14 @@ defmodule RealDealApiWeb.Router do
     pipe_through [:api, :auth]
 
     get "/accounts/by_id/:id", AccountController, :show
+
+    get "/accounts/sign_out", AccountController, :sign_out
+    get "/accounts/refresh_session", AccountController, :refresh_session
+
+    get "/accounts", AccountController, :index
+    get "/accounts/:id", AccountController, :show
+    patch "/accounts/:id", AccountController, :update
+    put "/accounts/:id", AccountController, :update
+    delete "/accounts/:id", AccountController, :delete
   end
 end

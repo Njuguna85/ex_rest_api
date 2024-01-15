@@ -37,6 +37,13 @@ defmodule RealDealApi.Accounts do
   """
   def get_account!(id), do: Repo.get!(Account, id)
 
+  def get_full_account(id) do
+    Account
+    |> where(id: ^id)
+    |> preload([:user])
+    |> Repo.one()
+  end
+
   @doc """
   Creates a account.
 
@@ -119,6 +126,7 @@ defmodule RealDealApi.Accounts do
   def get_account_by_email(email) do
     Account
     |> where(email: ^email)
+    |> preload([:user])
     |> Repo.one()
   end
 end

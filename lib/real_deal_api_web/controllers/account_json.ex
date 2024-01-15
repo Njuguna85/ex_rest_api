@@ -12,7 +12,8 @@ defmodule RealDealApiWeb.AccountJSON do
     %{
       id: account.id,
       email: account.email,
-      token: token
+      token: token,
+      user_id: account.user.id
     }
   end
 
@@ -26,7 +27,10 @@ defmodule RealDealApiWeb.AccountJSON do
   defp data(%Account{} = account) do
     %{
       id: account.id,
-      email: account.email
+      email: account.email,
+      full_name: account.user.full_name,
+      biography: account.user.biography,
+      gender: account.user.gender
     }
   end
 end

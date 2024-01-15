@@ -16,7 +16,7 @@ defmodule RealDealApiWeb.Auth.SetAccount do
       if account_id == nil, do: raise(ErrorResponse.Unauthorized)
 
       # get all the account details
-      account = Accounts.get_account!(account_id)
+      account = Accounts.get_full_account(account_id)
 
       cond do
         account_id && account ->

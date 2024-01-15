@@ -12,10 +12,10 @@ defmodule RealDealApiWeb.Router do
     conn |> json(%{errors: message}) |> halt()
   end
 
-  # @impl Plug.ErrorHandler
-  # def handle_errors(conn, map) do
-  #   conn |> halt()
-  # end
+  @impl Plug.ErrorHandler
+  def handle_errors(conn, map) do
+    conn |> halt()
+  end
 
   pipeline :api do
     plug :accepts, ["json"]
@@ -34,12 +34,12 @@ defmodule RealDealApiWeb.Router do
 
     post "/accounts", AccountController, :create
     post "/accounts/sign_in", AccountController, :sign_in
-
-    resources "/users", UserController, except: [:new, :edit]
   end
 
   scope "/api", RealDealApiWeb do
     pipe_through [:api, :auth]
+
+    resources "/users", UserController, except: [:new, :edit]
 
     get "/accounts/by_id/:id", AccountController, :show
 

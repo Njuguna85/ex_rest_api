@@ -3,7 +3,7 @@ defmodule RealDealApi.Accounts.Account do
   import Ecto.Changeset
 
   alias RealDealApi.Users.User
-
+  @optional_fields [:id, :inserted_at, :updated_at]
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
 
@@ -15,11 +15,15 @@ defmodule RealDealApi.Accounts.Account do
     timestamps(type: :utc_datetime)
   end
 
+  defp all_fields do
+    __MODULE__.__schema__(:fields)
+  end
+
   @doc false
   def changeset(account, attrs) do
     account
-    |> cast(attrs, [:email, :hashed_password])
-    |> validate_required([:email, :hashed_password])
+    |> cast(attrs, all_fields())
+    |> validate_required(all_fields() -- @optional_fields)
     |> validate_format(:email, ~r/^[^\s]+@[^\s]+$/, message: "must have the @ sign and no spaces")
     |> validate_length(:email, max: 160)
     |> unique_constraint(:email)

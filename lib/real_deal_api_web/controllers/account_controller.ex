@@ -28,11 +28,22 @@ defmodule RealDealApiWeb.AccountController do
     render(conn, :show, account: account)
   end
 
-  def update(conn, %{"account" => account_params}) do
-    account = Accounts.get_account!(account_params["id"])
+  def current_account_session(conn, %{}) do
+    conn
+    |> put_status(:ok)
+    |> render(:show, account: conn.assigns.account)
+  end
 
-    with {:ok, %Account{} = account} <- Accounts.update_account(account, account_params) do
-      render(conn, :show, account: account)
+  def update(conn, %{"current_hash" => current_hash, "account" => account_params}) do
+    case Guardian.validate_password(current_hash, conn.assigns.account.hashed_password) do
+      true ->
+        {:ok, %Account{} = account} =
+          Accounts.update_account(conn.assigns.account, account_params)
+
+        render(conn, :show, account: account)
+
+      false ->
+        raise ErrorResponse.Unauthorized
     end
   end
 

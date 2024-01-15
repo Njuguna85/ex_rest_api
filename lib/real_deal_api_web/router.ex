@@ -42,6 +42,7 @@ defmodule RealDealApiWeb.Router do
     resources "/users", UserController, except: [:new, :edit]
 
     get "/accounts/by_id/:id", AccountController, :show
+    get "/accounts/current/", AccountController, :current_account_session
 
     get "/accounts/sign_out", AccountController, :sign_out
     get "/accounts/refresh_session", AccountController, :refresh_session

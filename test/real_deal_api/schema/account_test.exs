@@ -61,5 +61,32 @@ defmodule RealDealApi.Schema.AccountTest do
       assert %Changeset{valid?: false, errors: _errors} =
                Account.changeset(%Account{}, invalid_params)
     end
+
+    test "error: returns an error changeset when an email address is reused " do
+      # request access to the database
+      Ecto.Adapters.SQL.Sandbox.checkout(RealDealApi.Repo)
+
+      {:ok, existing_account} =
+        %Account{}
+        |> Account.changeset(valid_params(@expected_fields_with_types))
+        |> RealDealApi.Repo.insert()
+
+      changeset_with_repeated_email =
+        %Account{}
+        |> Account.changeset(
+          valid_params(@expected_fields_with_types)
+          |> Map.put("email", existing_account.email)
+        )
+
+      assert {:error, %Changeset{valid?: false, errors: errors}} =
+               RealDealApi.Repo.insert(changeset_with_repeated_email)
+
+      assert errors[:email], "The field :email is missing from errors."
+
+      {_, meta} = errors[:email]
+
+      assert meta[:constraint] == :unique,
+             "The validation type, #{meta[:validation]} is incorrect"
+    end
   end
 end

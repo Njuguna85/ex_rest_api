@@ -4,8 +4,13 @@ defmodule RealDealApi.Support.SchemaCase do
   using do
     quote do
       alias Ecto.Changeset
+      # Import for potential additional utilities
       import RealDealApi.Support.SchemaCase
     end
+  end
+
+  setup _ do
+    Ecto.Adapters.SQL.Sandbox.mode(RealDealApi.Repo, :manual)
   end
 
   def valid_params(fields_with_types) do
